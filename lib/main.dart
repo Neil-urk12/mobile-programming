@@ -46,7 +46,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
       return 'Register username is required';
     }
     if (!RegExp(_usernamePattern).hasMatch(value)) {
-      return 'Username must be 3-20 characters, alphanumeric/underscore/hyphen only';
+      return 'Username must be 6-20 characters, alphanumeric/underscore/hyphen only';
     }
     return null;
   }
@@ -118,6 +118,9 @@ class _RegistrationFormState extends State<RegistrationForm> {
       _emailController.clear();
       _mobileController.clear();
       _passwordController.clear();
+
+      // Reset form validation state to clear any error messages
+      _formKey.currentState!.reset();
     }
   }
 
@@ -151,7 +154,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
               TextFormField(
                 controller: _registerUsernameController,
                 decoration: const InputDecoration(
-                  labelText: 'Register Username',
+                  labelText: 'Username',
                   hintText: 'Enter your username',
                   prefixIcon: Icon(Icons.person_outline),
                   border: OutlineInputBorder(),
@@ -166,7 +169,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
               TextFormField(
                 controller: _userNameController,
                 decoration: const InputDecoration(
-                  labelText: 'User Name',
+                  labelText: 'Full Name',
                   hintText: 'Enter your full name',
                   prefixIcon: Icon(Icons.account_circle),
                   border: OutlineInputBorder(),
