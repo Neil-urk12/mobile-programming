@@ -105,12 +105,14 @@ class _RegistrationFormState extends State<RegistrationForm> {
       });
 
       // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Registration successful!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Registration successful!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
 
       // Clear form
       _registerUsernameController.clear();
