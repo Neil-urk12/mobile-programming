@@ -29,9 +29,11 @@ class _RegistrationFormState extends State<RegistrationForm> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _mobileController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _repeatPasswordController = TextEditingController();
   
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _passwordsMatch = true;
 
   // Validation regex patterns
   static const String _usernamePattern = r'^[a-zA-Z0-9_-]{3,20}$';
@@ -85,8 +87,20 @@ class _RegistrationFormState extends State<RegistrationForm> {
     if (value == null || value.isEmpty) {
       return 'Password is required';
     }
+
     if (!RegExp(_passwordPattern).hasMatch(value)) {
       return 'Password must be at least 8 characters with uppercase, lowercase, digit, and special character';
+    }
+    return null;
+  }
+
+  String? _validateRepeatPassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please confirm your password';
+    }
+
+    if (value != _passwordController.text) {
+      return 'Passwords do not match';
     }
     return null;
   }
@@ -120,10 +134,28 @@ class _RegistrationFormState extends State<RegistrationForm> {
       _emailController.clear();
       _mobileController.clear();
       _passwordController.clear();
+      _repeatPasswordController.clear();
 
       // Reset form validation state to clear any error messages
       _formKey.currentState!.reset();
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Add listeners for real-time password matching validation
+    _passwordController.addListener(_checkPasswordMatch);
+    _repeatPasswordController.addListener(_checkPasswordMatch);
+  }
+
+  void _checkPasswordMatch() {
+    setState(() {
+      _passwordsMatch = _passwordController.text == _repeatPasswordController.text &&
+                       _passwordController.text.isNotEmpty &&
+                       _repeatPasswordController.text.isNotEmpty;
+    });
   }
 
   @override
@@ -133,6 +165,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
     _emailController.dispose();
     _mobileController.dispose();
     _passwordController.dispose();
+    _repeatPasswordController.dispose();
     super.dispose();
   }
 
@@ -236,6 +269,46 @@ class _RegistrationFormState extends State<RegistrationForm> {
                 obscureText: _obscurePassword,
                 textInputAction: TextInputAction.done,
                 validator: _validatePassword,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                onFieldSubmitted: (_) => _submitForm(),
+              ),
+              const SizedBox(height: 16),
+
+              TextFormField(
+                controller: _repeatPasswordController,
+                decoration: InputDecoration(
+                  labelText: 'Repeat Password',
+                  hintText: 'Repeat your password',
+                  prefixIcon: Icon(Icons.lock),
+                  suffixIcon: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
+                      if (_repeatPasswordController.text.isNotEmpty)
+                        Container(
+                          margin: const EdgeInsets.only(right: 8),
+                          child: Icon(
+                            _passwordsMatch ? Icons.check_circle : Icons.error,
+                            color: _passwordsMatch ? Colors.green : Colors.red,
+                            size: 20,
+                          ),
+                        ),
+                    ],
+                  ),
+                  border: OutlineInputBorder(),
+                ),
+                obscureText: _obscurePassword,
+                textInputAction: TextInputAction.done,
+                validator: _validateRepeatPassword,
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 onFieldSubmitted: (_) => _submitForm(),
               ),
